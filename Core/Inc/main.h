@@ -28,7 +28,6 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f0xx_hal.h"
 #include "stm32f0xx_ll_crs.h"
 #include "stm32f0xx_ll_rcc.h"
 #include "stm32f0xx_ll_bus.h"
@@ -40,6 +39,11 @@ extern "C" {
 #include "stm32f0xx_ll_dma.h"
 #include "stm32f0xx_ll_usart.h"
 #include "stm32f0xx_ll_gpio.h"
+
+
+#if defined(USE_FULL_ASSERT)
+#include "stm32_assert.h"
+#endif /* USE_FULL_ASSERT */
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -79,10 +83,6 @@ void Error_Handler(void);
 #define B1_GPIO_Port GPIOA
 #define EXT_RESET_Pin LL_GPIO_PIN_5
 #define EXT_RESET_GPIO_Port GPIOC
-#define SPI2_SCK_Pin LL_GPIO_PIN_13
-#define SPI2_SCK_GPIO_Port GPIOB
-#define SPI2_MISO_Pin LL_GPIO_PIN_14
-#define SPI2_MISO_GPIO_Port GPIOB
 #define LD3_Pin LL_GPIO_PIN_6
 #define LD3_GPIO_Port GPIOC
 #define LD6_Pin LL_GPIO_PIN_7
@@ -91,24 +91,31 @@ void Error_Handler(void);
 #define LD4_GPIO_Port GPIOC
 #define LD5_Pin LL_GPIO_PIN_9
 #define LD5_GPIO_Port GPIOC
-#define USBF4_DM_Pin LL_GPIO_PIN_11
-#define USBF4_DM_GPIO_Port GPIOA
-#define USBF4_DP_Pin LL_GPIO_PIN_12
-#define USBF4_DP_GPIO_Port GPIOA
-#define SWDIO_Pin LL_GPIO_PIN_13
-#define SWDIO_GPIO_Port GPIOA
 #define SWCLK_Pin LL_GPIO_PIN_14
 #define SWCLK_GPIO_Port GPIOA
+#ifndef NVIC_PRIORITYGROUP_0
+#define NVIC_PRIORITYGROUP_0         ((uint32_t)0x00000007) /*!< 0 bit  for pre-emption priority,
+                                                                 4 bits for subpriority */
+#define NVIC_PRIORITYGROUP_1         ((uint32_t)0x00000006) /*!< 1 bit  for pre-emption priority,
+                                                                 3 bits for subpriority */
+#define NVIC_PRIORITYGROUP_2         ((uint32_t)0x00000005) /*!< 2 bits for pre-emption priority,
+                                                                 2 bits for subpriority */
+#define NVIC_PRIORITYGROUP_3         ((uint32_t)0x00000004) /*!< 3 bits for pre-emption priority,
+                                                                 1 bit  for subpriority */
+#define NVIC_PRIORITYGROUP_4         ((uint32_t)0x00000003) /*!< 4 bits for pre-emption priority,
+                                                                 0 bit  for subpriority */
+#endif
 /* USER CODE BEGIN Private defines */
+
 char gps_buffer[128];
 uint8_t gps_buffer_pointer;
 uint8_t gps_data_ready;
 int gps_dump;
 int start_message;
 
-char  output_buffer_1[128];
-char output_buffer_2[128];
-uint8_t output_buffer_num;
+char output_buffer_1[256];
+char output_buffer_2[256];
+int output_buffer_num;
 uint8_t output_buffer_pointer;
 
 /* USER CODE END Private defines */

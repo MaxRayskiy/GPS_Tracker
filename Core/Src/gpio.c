@@ -36,8 +36,6 @@
         * Output
         * EVENT_OUT
         * EXTI
-     PB13   ------> SPI2_SCK
-     PB14   ------> SPI2_MISO
 */
 void MX_GPIO_Init(void)
 {
@@ -84,24 +82,6 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
   GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   LL_GPIO_Init(EXT_RESET_GPIO_Port, &GPIO_InitStruct);
-
-  /**/
-  GPIO_InitStruct.Pin = SPI2_SCK_Pin;
-  GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
-  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
-  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-  GPIO_InitStruct.Alternate = LL_GPIO_AF_0;
-  LL_GPIO_Init(SPI2_SCK_GPIO_Port, &GPIO_InitStruct);
-
-  /**/
-  GPIO_InitStruct.Pin = SPI2_MISO_Pin;
-  GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
-  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
-  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-  GPIO_InitStruct.Alternate = LL_GPIO_AF_0;
-  LL_GPIO_Init(SPI2_MISO_GPIO_Port, &GPIO_InitStruct);
 
   /**/
   GPIO_InitStruct.Pin = LD3_Pin;

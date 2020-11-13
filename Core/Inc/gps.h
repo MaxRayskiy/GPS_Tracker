@@ -1,4 +1,4 @@
-#define GPS_DEBUG	1
+#define GPS_DEBUG	0
 
 /*       GPS SETTINGS
 GPS_USART	           USART1
@@ -24,8 +24,6 @@ typedef struct {
     char msl_units;
 
 } GPS_status;
-
-int gps_dump;
 
 void GPS_UART_callback();
 void GPS_UART_debug_callback();

@@ -19,41 +19,36 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "tsc.h"
 #include "usart.h"
 #include "gpio.h"
 
-#include "gps.h"
+#include"gps.h"
+
 
 void SystemClock_Config(void);
 
-
-/* USER CODE END 0 */
-
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
 int main(void)
 {
+	  output_buffer_num = 1;
+	  output_buffer_pointer = 0;
+	  gps_buffer_pointer = 0;
+	  gps_data_ready = 0;
+	  gps_dump = 0;
+	  start_message = 0;
+
+  LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_SYSCFG);
+  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
 
   SystemClock_Config();
 
-  /* Initialize all configured peripherals */
+
+
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
 
-
-  output_buffer_pointer = 0;
-  gps_buffer_pointer = 0;
-  gps_data_ready = 0;
-  gps_dump = 0;
-  start_message = 0;
-
   LL_USART_EnableIT_RXNE(USART1);
   LL_USART_EnableIT_ERROR(USART1);
-
 
   while (1)
   {
@@ -61,11 +56,15 @@ int main(void)
 		gps_data_ready = 0;
 		GPS_parse();
 		GPS_dump_buffer();
+
 	  }
   }
 }
 
-// @brief System Clock Configuration
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
 void SystemClock_Config(void)
 {
   LL_FLASH_SetLatency(LL_FLASH_LATENCY_1);
@@ -97,19 +96,26 @@ void SystemClock_Config(void)
   {
 
   }
+  LL_Init1msTick(48000000);
   LL_SetSystemCoreClock(48000000);
-
-   /* Update the time base */
-  if (HAL_InitTick (TICK_INT_PRIORITY) != HAL_OK)
-  {
-    Error_Handler();
-  }
   LL_RCC_SetUSARTClockSource(LL_RCC_USART1_CLKSOURCE_PCLK1);
 }
 
+/* USER CODE BEGIN 4 */
 
+/* USER CODE END 4 */
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
 void Error_Handler(void)
-{}
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+
+  /* USER CODE END Error_Handler_Debug */
+}
 
 #ifdef  USE_FULL_ASSERT
 /**

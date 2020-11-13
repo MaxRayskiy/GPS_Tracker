@@ -1,9 +1,8 @@
-#include"gps.h"
-
 #include <usart.h>
-#include <main.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include"gps.h"
 
 GPS_status GPS;
 
@@ -21,7 +20,8 @@ void GPS_UART_callback() {
 	}
 	if (data == 0x0A) {
 		gps_buffer_pointer = 0;
-		output_buffer_num = 1 ? 2 : 1;
+		output_buffer_num = (output_buffer_num == 1) ? 2 : 1;
+
 		gps_data_ready = 1;
 		start_message = 0;
 		LL_GPIO_TogglePin(GPIOC, LL_GPIO_PIN_7);
@@ -35,18 +35,15 @@ void GPS_UART_debug_callback() {
 		if(output_buffer_num == 1) {
 			data = output_buffer_2[output_buffer_pointer++];
 		} else {
-			data = output_buffer_2[output_buffer_pointer++];
+			data = output_buffer_1[output_buffer_pointer++];
 		}
 	} else {
-		data= gps_buffer[output_buffer_pointer++];
+		data = gps_buffer[output_buffer_pointer++];
 	}
-
 	LL_USART_TransmitData8(USART3, data);
 	if (data == 0x0A) {
 		output_buffer_pointer = 0;
 		LL_USART_DisableIT_TXE(USART3);
-		gps_dump = 0;
-		return;
 	}
 	return;
 }
@@ -56,7 +53,6 @@ void GPS_parse() {
 	// struct is sending
 	if (gps_dump == 1)
 		return;
-
 	GPS.status = 0;
 
 	char* data_ptr;
@@ -76,7 +72,8 @@ void GPS_parse() {
 		data_ptr[2] == 'G' &&
 		data_ptr[3] == 'G' &&
 		data_ptr[4] == 'A') {
-		GPS.status = 2;
+
+		GPS.status = 1;
 		//"$GPGGA,%f,%f,%c,%f,%c,%d,%d,%f,%f,%c"
 		char* beg = &data_ptr[6];
 		char* end;
@@ -135,5 +132,6 @@ void GPS_dump_buffer() {
 		LL_USART_EnableIT_TXE(USART3);
 	}
 	gps_dump = 0;
+
 	return;
 }
