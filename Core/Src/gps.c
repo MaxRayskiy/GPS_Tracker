@@ -117,12 +117,15 @@ void GPS_parse() {
 void GPS_dump_buffer() {
 	gps_dump = 1;
 	if (GPS.status > 0) {
-		if (GPS.lock == 1) {
+		if (GPS.lock == 1) { // GPS fix
 			if (GPS.satelites < 7) {
 				LL_GPIO_TogglePin(GPIOC, LL_GPIO_PIN_9);
 			} else {
 				LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_9);
 			}
+			LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_8);
+		} else if (GPS.lock == 2) // DGPS fix
+			LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_9);
 			LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_8);
 		} else {
 			LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_8);
