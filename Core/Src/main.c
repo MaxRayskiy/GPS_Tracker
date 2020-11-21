@@ -22,43 +22,128 @@
 #include "usart.h"
 #include "gpio.h"
 
-#include"gps.h"
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include "gps.h"
+#include "gprs.h"
 
+//delete!!
+#include <stdio.h>
+#include <stdlib.h>
 
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+
+/* USER CODE BEGIN PV */
+
+/* USER CODE END PV */
+
+/* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+/* USER CODE BEGIN PFP */
 
+/* USER CODE END PFP */
+
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+
+/* USER CODE END 0 */
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
 int main(void)
 {
-	  output_buffer_num = 1;
-	  output_buffer_pointer = 0;
-	  gps_buffer_pointer = 0;
-	  gps_data_ready = 0;
-	  gps_dump = 0;
-	  start_message = 0;
+  /* USER CODE BEGIN 1 */
+
+  /* USER CODE END 1 */
+
+  /* MCU Configuration--------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
 
   LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_SYSCFG);
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
 
+  /* System interrupt init*/
+
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
+  /* Configure the system clock */
   SystemClock_Config();
 
+  /* USER CODE BEGIN SysInit */
+  output_buffer_num = 1;
+  output_buffer_pointer = 0;
+  gps_buffer_pointer = 0;
+  gps_data_ready = 0;
+  gps_dump = 0;
+  start_message = 0;
+  /* USER CODE END SysInit */
 
-
+  /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
+  MX_USART2_UART_Init();
+  /* USER CODE BEGIN 2 */
 
-  LL_USART_EnableIT_RXNE(USART1);
-  LL_USART_EnableIT_ERROR(USART1);
+  sprintf(gps_buffer, "starting\r\n");
+  LL_USART_EnableIT_TXE(USART1);
 
+  // init gprs module
+  LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_4);
+  LL_GPIO_SetOutputPin(GPIOA, LL_GPIO_PIN_5);
+  LL_mDelay(3000);
+  LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_5);
+  LL_mDelay(3000);
+
+
+  if (GPRS_init())
+	  LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_9);
+  else
+	  LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_6);
+/*
+  if (GPRS_check_power_up()) {
+		LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_9);
+	  sprintf(gps_buffer, "power check OK\r\n");
+	  LL_USART_EnableIT_TXE(USART1);
+  } else {
+	  //sprintf(gps_buffer, "power check fail\r\n");
+	  //LL_USART_EnableIT_TXE(USART1);
+  }*/
+  //GPRS_init();
+  //LL_USART_EnableIT_RXNE(USART1);
+  //LL_USART_EnableIT_ERROR(USART1);
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if (gps_data_ready == 1) {
-		gps_data_ready = 0;
-		GPS_parse();
-		GPS_dump_buffer();
+    /* USER CODE END WHILE */
 
-	  }
+    /* USER CODE BEGIN 3 */
   }
+  /* USER CODE END 3 */
 }
 
 /**
@@ -99,6 +184,7 @@ void SystemClock_Config(void)
   LL_Init1msTick(48000000);
   LL_SetSystemCoreClock(48000000);
   LL_RCC_SetUSARTClockSource(LL_RCC_USART1_CLKSOURCE_PCLK1);
+  LL_RCC_SetUSARTClockSource(LL_RCC_USART2_CLKSOURCE_PCLK1);
 }
 
 /* USER CODE BEGIN 4 */

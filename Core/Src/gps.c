@@ -40,10 +40,10 @@ void GPS_UART_debug_callback() {
 	} else {
 		data = gps_buffer[output_buffer_pointer++];
 	}
-	LL_USART_TransmitData8(USART3, data);
+	LL_USART_TransmitData8(USART1, data);
 	if (data == 0x0A) {
 		output_buffer_pointer = 0;
-		LL_USART_DisableIT_TXE(USART3);
+		LL_USART_DisableIT_TXE(USART1);
 	}
 	return;
 }
@@ -124,7 +124,7 @@ void GPS_dump_buffer() {
 				LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_9);
 			}
 			LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_8);
-		} else if (GPS.lock == 2) // DGPS fix
+		} else if (GPS.lock == 2) { // DGPS fix
 			LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_9);
 			LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_8);
 		} else {
@@ -132,7 +132,7 @@ void GPS_dump_buffer() {
 			LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_9);
 		}
 		sprintf(gps_buffer, "t=%.1f fix=%d lat=%f%c lon=%f%c sat=%d alt=%f\r\n", GPS.utc_time, GPS.lock, GPS.latitude, GPS.ns,  GPS.longitude, GPS.ew, GPS.satelites, GPS.msl_altitude);
-		LL_USART_EnableIT_TXE(USART3);
+		LL_USART_EnableIT_TXE(USART2);
 	}
 	gps_dump = 0;
 
