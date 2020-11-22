@@ -84,7 +84,7 @@ int main(void)
   /* System interrupt init*/
 
   /* USER CODE BEGIN Init */
-
+  sim800_init();
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -102,35 +102,49 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
-  MX_USART3_UART_Init();
+
   MX_USART2_UART_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  sprintf(gps_buffer, "starting\r\n");
-  LL_USART_EnableIT_TXE(USART1);
-
-  // init gprs module
-  LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_4);
   LL_GPIO_SetOutputPin(GPIOA, LL_GPIO_PIN_5);
   LL_mDelay(3000);
   LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_5);
-  LL_mDelay(3000);
 
+  LL_USART_Disable(USART3);
+  LL_mDelay(200);
+  LL_USART_Enable(USART3);
 
-  if (GPRS_init())
-	  LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_9);
-  else
+ sprintf(debug_buffer, "power:\r\n");
+ LL_USART_EnableIT_TXE(USART1);
+ LL_mDelay(500);
+
+  //LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_8);
+  if (!GPRS_check_power_up() ) {
+  	  LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_6);
+  	  sprintf(debug_buffer, "power FAIL\r\n");
+  	  LL_USART_EnableIT_TXE(USART1);
+  	  LL_mDelay(3000);
+  	  while(1);
+  }
+
+  if (!GPRS_init() ) {
 	  LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_6);
+      sprintf(debug_buffer, "init FAIL\r\n");
+   	  LL_USART_EnableIT_TXE(USART1);
+   	  LL_mDelay(3000);
+   	  while(1);
+   }
+
+  LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_9);
+
 /*
-  if (GPRS_check_power_up()) {
-		LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_9);
-	  sprintf(gps_buffer, "power check OK\r\n");
+  if(GPRS_send_SMS_debug()) {
+	  sprintf(debug_buffer, "SMS OK\r\n");
 	  LL_USART_EnableIT_TXE(USART1);
-  } else {
-	  //sprintf(gps_buffer, "power check fail\r\n");
-	  //LL_USART_EnableIT_TXE(USART1);
   }*/
-  //GPRS_init();
+  LL_mDelay(500);
+  // Enable GPS messages
   //LL_USART_EnableIT_RXNE(USART1);
   //LL_USART_EnableIT_ERROR(USART1);
   /* USER CODE END 2 */

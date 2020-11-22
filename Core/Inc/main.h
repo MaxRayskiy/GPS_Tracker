@@ -106,7 +106,7 @@ void Error_Handler(void);
 #endif
 /* USER CODE BEGIN Private defines */
 
-char gps_buffer[128];
+char debug_buffer[128];
 uint8_t gps_buffer_pointer;
 uint8_t gps_data_ready;
 int gps_dump;

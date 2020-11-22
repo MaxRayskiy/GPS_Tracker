@@ -27,49 +27,80 @@ void sim800_send_AT(void) {
 	SIM800.tx_complite = 0;
 }
 
-int sim800_wait_for_resp(char* resp) {
+void sim800_wait_for_resp(char* resp) {
 	  LL_USART_EnableIT_RXNE(USART3);
 	  LL_USART_EnableIT_ERROR(USART3);
-	  while(SIM800.rx_complite != 1);
+	  while(SIM800.rx_complite != 1)
+	  {}
 	  memcpy(resp, SIM800.rx_buffer, strlen(SIM800.rx_buffer) - 1);
 	  SIM800.rx_complite = 0;
-	  return 1;
+}
+
+int sim800_send_end_mark() {
+	while(SIM800.tx_complite != 0);
+	SIM800.tx_buffer[0] = (char)(26);
+	SIM800.tx_buffer[1] = '\r';
+	SIM800.tx_buffer[2] = '\n';
+	SIM800.tx_cnt = 0;
+	LL_USART_EnableIT_TXE(USART3);
+	while(SIM800.tx_complite != 1);
+	SIM800.tx_complite = 0;
 }
 
 int sim800_check_with_cmd(const char* cmd, const char *trg_resp) {
-	//sprintf(gps_buffer, "%s 11\r\n", cmd);
-	//LL_USART_EnableIT_TXE(USART1);
-	sim800_send_cmd(cmd);
-	char src_resp[128];
-	LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_7);
-	sim800_wait_for_resp(src_resp);
-	sim800_wait_for_resp(src_resp);
-	LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_7);
-	sprintf(gps_buffer, "%s", cmd);
+	sprintf(debug_buffer, "%s", cmd);
 	LL_USART_EnableIT_TXE(USART1);
 	LL_mDelay(100);
-	sprintf(gps_buffer, "%s", src_resp);
-	LL_USART_EnableIT_TXE(USART1);
-	LL_mDelay(100);
-
-	//sprintf(gps_buffer, "%d\r\n", strlen(trg_resp));
-	//LL_USART_EnableIT_TXE(USART1);
-	//return 0;
+	int answers_cnt = 0;
 	for (int i = 0; i < strlen(trg_resp); ++i) {
-		if (src_resp[i] != trg_resp[i]) {
-			sprintf(gps_buffer, "%d %d %d\r\n", i, strlen(trg_resp), strlen(src_resp));
-			LL_USART_EnableIT_TXE(USART1);
-			break;
-			LL_mDelay(100);
-			return 0;
+		if (trg_resp[i] == '\n') {
+			++answers_cnt;
 		}
 	}
+	/*
+	sprintf(gps_buffer, "answers_cnt=%d\r\n", answers_cnt);
+	LL_USART_EnableIT_TXE(USART1);
 	LL_mDelay(100);
+*/
+	char src_resp[128];
+
+
+	sim800_send_cmd(cmd);
+
+	sim800_wait_for_resp(src_resp);
+
+	/*
+	sprintf(gps_buffer, "answers_cnt=%d\r\n", answers_cnt);
+	LL_USART_EnableIT_TXE(USART1);
+	LL_mDelay(100);
+*/
+	int resp_pos = 0;
+	while(answers_cnt != 0) {
+		--answers_cnt;
+		sim800_wait_for_resp(src_resp);
+
+		sprintf(debug_buffer, "%s", src_resp);
+		LL_USART_EnableIT_TXE(USART1);
+		LL_mDelay(100);
+
+		for (; resp_pos < strlen(trg_resp); ++resp_pos) {
+			if (src_resp[resp_pos] != trg_resp[resp_pos]) {
+				sprintf(debug_buffer, "failed compare: %d %d %d\r\n", resp_pos, strlen(trg_resp), strlen(src_resp));
+				LL_USART_EnableIT_TXE(USART1);
+				LL_mDelay(100);
+				return 0;
+			}
+			if (src_resp[resp_pos] == '\n' && src_resp[resp_pos - 1] == '\r') {
+				break;
+			}
+		}
+		LL_mDelay(100);
+	}
 	return 1;
 }
 
 void GPRS_RX_Callback() {
-	//LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_9);
+
 	char data = LL_USART_ReceiveData8(USART3);
 	SIM800.rx_buffer[SIM800.rx_cnt++] = data;
 	if (data == 0x0A) {

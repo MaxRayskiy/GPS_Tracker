@@ -181,7 +181,7 @@ void USART3_4_IRQHandler(void)
 	} else if (LL_USART_IsActiveFlag_TXE(USART3)) {
 		GPRS_TX_Callback();
 	} else {
-
+		//char tmp = LL_USART_ReceiveData8(USART3);
 	}
   /* USER CODE END USART3_4_IRQn 0 */
 

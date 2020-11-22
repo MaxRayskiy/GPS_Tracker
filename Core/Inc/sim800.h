@@ -16,6 +16,7 @@ void sim800_init();
 
 void send_cmd(const char* cmd);
 void send_AT(void);
+//int sim800_send_end_mark();
 
 int wait_for_resp(const char* resp, unsigned int timeout);
 int check_with_cmd(const char* cmd, const char *resp, unsigned int timeout);
