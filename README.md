@@ -1,5 +1,5 @@
-## Current progress: receiving and parsing GPS data.
-## Now working on: add base commands for GPRS module management.
+## Current progress: receiving and parsing GPS data, starting GPRS module(see gprs_init branch).
+## Now working on: establish TCP connection with server.
 
 
 ## Hardware used in the project:
