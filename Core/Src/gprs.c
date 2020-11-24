@@ -100,7 +100,7 @@ int GPRS_send_SMS_debug() {
 	}
 
 	LL_mDelay(500);
-	if (!sim800_send_cmd("AT+CMGS=\"+79xxxxxxxxx\"\r\n",">")) {
+	if (!sim800_check_with_cmd("AT+CMGS=\"+79xxxxxxxxx\"\r\n",">")) {
 		sprintf(debug_buffer, "SMS FAIL_2\r\n");
 		LL_USART_EnableIT_TXE(USART1);
 	    return 0;
@@ -111,10 +111,92 @@ int GPRS_send_SMS_debug() {
 	sim800_send_end_mark();
 	return 1;
 }
-/*
-int GPRS_connect(Protocol ptl, const char * host, int port, int timeout);
-int GPRS_is_connected();
-int GPRS_disconnect();
 
-int GPRS_send_tcp(const char* data);
-*/
+int GPRS_connect_TCP() {
+	/*
+	if (!sim800_check_with_cmd("AT+CPIN?\r\n", "+CPIN: READY\r\n\r\nOK\r\n\r\n")) {
+		//sprintf(debug_buffer, "1\r\n");
+		//LL_USART_EnableIT_TXE(USART1);
+	    return 0;
+	}*/
+	if (!sim800_check_with_cmd("AT+CIPMODE=0\r\n", "OK\r\n")) {
+
+	    return 0;
+	}
+	if (!sim800_check_with_cmd("AT+CIPMUX=0", "OK\r\n")) {
+
+	    return 0;
+	}
+	/*
+	if (!sim800_check_with_cmd("AT+CIPSTATUS\r\n", "OK\r\n\r\nSTATE: IP INITIAL\r\n")) {
+		sprintf(debug_buffer, "4\r\n");
+		LL_USART_EnableIT_TXE(USART1);
+	    return 0;
+	}*/
+	if (!sim800_check_with_cmd("AT+CSTT=\"internet\"\r\n", "OK\r\n")) {
+
+	    return 0;
+	}
+	LL_mDelay(100);
+	//LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_7);
+	sim800_check_with_cmd("AT+CIICR\r\n", "111\r\n");
+	//LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_8);
+	sim800_check_with_cmd("AT+CIFSR\r\n", "111\r\n");
+
+	//LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_7);
+	LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_8);
+	sim800_check_with_cmd("AT+CIPSTART=\"TCP\",\"130.193.34.111\",1234\r\n", "OK\r\n\r\nCONNECT OK\r\n");
+
+	sim800_check_with_cmd("AT+CIPQSEND=1\r\n", "OK\r\n"); // fast mode
+	LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_8);
+	return 1;
+
+
+	//sprintf(debug_buffer, "%s\r\n", tmp);
+
+	LL_USART_EnableIT_TXE(USART1);
+	LL_mDelay(2000);
+	if (!sim800_check_with_cmd("AT+CIPSTATUS\r\n", "OK\r\n\r\nSTATE: IP STATUS\r\n")) {
+
+	    return 0;
+	}
+	return 1;
+	if (!sim800_check_with_cmd("\r\n", "OK\r\n")) {
+
+	    return 0;
+	}
+	if (!sim800_check_with_cmd("\r\n", "OK\r\n")) {
+
+	    return 0;
+	}
+	if (!sim800_check_with_cmd("\r\n", "OK\r\n")) {
+	    return 0;
+	}
+
+}
+
+int GPRS_is_connected() {
+
+}
+
+int GPRS_disconnect() {
+
+}
+
+int GPRS_send_tcp() {
+	gprs_dump = 1;
+	LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_7);
+
+
+	sim800_send_cmd("AT+CIPSEND\r\n", ">");
+	LL_mDelay(800);
+	sim800_send_cmd(gprs_report);
+	sim800_send_end_mark();
+	sprintf(gprs_report, "sent\r\n");
+	gprs_dump = 0;
+
+
+
+	LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_7);
+}
+

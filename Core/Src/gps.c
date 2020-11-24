@@ -116,7 +116,9 @@ void GPS_parse() {
 
 void GPS_dump_buffer() {
 	gps_dump = 1;
-	if (GPS.status > 0) {
+	//sprintf(gprs_report, "t=%.1f fix=%d st=%d\r\n", GPS.utc_time, GPS.lock, GPS.status);
+	if (GPS.lock > 0) {
+		  LL_GPIO_TogglePin(GPIOC, LL_GPIO_PIN_9);
 		if (GPS.lock == 1) { // GPS fix
 			if (GPS.satelites < 7) {
 				LL_GPIO_TogglePin(GPIOC, LL_GPIO_PIN_9);
@@ -127,14 +129,11 @@ void GPS_dump_buffer() {
 		} else if (GPS.lock == 2) { // DGPS fix
 			LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_9);
 			LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_8);
-		} else {
-			LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_8);
-			LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_9);
 		}
-		sprintf(debug_buffer, "t=%.1f fix=%d lat=%f%c lon=%f%c sat=%d alt=%f\r\n", GPS.utc_time, GPS.lock, GPS.latitude, GPS.ns,  GPS.longitude, GPS.ew, GPS.satelites, GPS.msl_altitude);
-		LL_USART_EnableIT_TXE(USART2);
+		sprintf(gprs_report, "t=%.1f fix=%d lat=%f%c lon=%f%c sat=%d alt=%f\r\n", GPS.utc_time, GPS.lock, GPS.latitude, GPS.ns,  GPS.longitude, GPS.ew, GPS.satelites, GPS.msl_altitude);
+	} else {
+		LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_8);
+		LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_9);
 	}
 	gps_dump = 0;
-
-	return;
 }

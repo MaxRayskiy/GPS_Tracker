@@ -23,4 +23,12 @@ int check_with_cmd(const char* cmd, const char *resp, unsigned int timeout);
 
 
 void GPRS_RX_Callback();
+int messages_rx_cnt;
 void GPRS_TX_Callback();
+
+
+
+/*
+char AT_CIPQSEND_1[] = "AT+CIPQSEND=1\r\n";
+char AT_CIPQSEND[] = "AT+CIPQSEND\r\n";
+*/

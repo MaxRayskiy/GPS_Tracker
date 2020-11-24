@@ -144,8 +144,6 @@ void SysTick_Handler(void)
   */
 void USART1_IRQHandler(void)
 {
-	GPS_UART_debug_callback();
-	return;
   /* USER CODE BEGIN USART1_IRQn 0 */
 	  if(LL_USART_IsActiveFlag_RXNE(USART1) && LL_USART_IsEnabledIT_RXNE(USART1)) {
 		  GPS_UART_callback();

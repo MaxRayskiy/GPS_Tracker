@@ -96,17 +96,22 @@ int main(void)
   gps_buffer_pointer = 0;
   gps_data_ready = 0;
   gps_dump = 0;
+  gprs_dump = 0;
+  //
   start_message = 0;
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  LL_GPIO_TogglePin(GPIOC, LL_GPIO_PIN_7);
   MX_USART1_UART_Init();
-
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
+  LL_USART_EnableIT_RXNE(USART1);
+  LL_USART_EnableIT_ERROR(USART1);
 
+  //LL_GPIO_TogglePin(GPIOC, LL_GPIO_PIN_7);
   LL_GPIO_SetOutputPin(GPIOA, LL_GPIO_PIN_5);
   LL_mDelay(3000);
   LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_5);
@@ -115,11 +120,28 @@ int main(void)
   LL_mDelay(200);
   LL_USART_Enable(USART3);
 
- sprintf(debug_buffer, "power:\r\n");
- LL_USART_EnableIT_TXE(USART1);
- LL_mDelay(500);
+  LL_GPIO_TogglePin(GPIOC, LL_GPIO_PIN_7);
+ // Enable GPS messages
 
+ LL_mDelay(5000);
+ GPRS_connect_TCP();
+ LL_mDelay(500);
+ while(1) {
+	 for (int i = 0; i < 100; ++ i) {
+		 if (gps_data_ready == 1) {
+			 gps_data_ready = 0;
+			 GPS_parse();
+			 GPS_dump_buffer();
+		 }
+		 LL_mDelay(100);
+	 }
+
+	 GPRS_send_tcp();
+	 LL_mDelay(2000); // 10 sec
+
+ }
   //LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_8);
+ /*
   if (!GPRS_check_power_up() ) {
   	  LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_6);
   	  sprintf(debug_buffer, "power FAIL\r\n");
@@ -135,7 +157,7 @@ int main(void)
    	  LL_mDelay(3000);
    	  while(1);
    }
-
+*/
   LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_9);
 
 /*
@@ -144,6 +166,7 @@ int main(void)
 	  LL_USART_EnableIT_TXE(USART1);
   }*/
   LL_mDelay(500);
+  //GPRS_connect_TCP();
   // Enable GPS messages
   //LL_USART_EnableIT_RXNE(USART1);
   //LL_USART_EnableIT_ERROR(USART1);
